@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -23,7 +24,7 @@ import com.an.room.util.RecyclerItemClickListener;
 import java.util.List;
 
 public class NotesListActivity extends AppCompatActivity implements View.OnClickListener,
-                                                        RecyclerItemClickListener.OnRecyclerViewItemClickListener, AppConstants {
+        RecyclerItemClickListener.OnRecyclerViewItemClickListener, AppConstants {
 
 
     private TextView emptyView;
@@ -32,6 +33,7 @@ public class NotesListActivity extends AppCompatActivity implements View.OnClick
     private FloatingActionButton floatingActionButton;
 
     private NoteRepository noteRepository;
+    private String tag = "NotesListActivity";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -41,7 +43,7 @@ public class NotesListActivity extends AppCompatActivity implements View.OnClick
         noteRepository = new NoteRepository(getApplicationContext());
 
         recyclerView = findViewById(R.id.task_list);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2 , StaggeredGridLayoutManager.VERTICAL));
+        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, this));
 
         floatingActionButton = findViewById(R.id.fab);
@@ -56,7 +58,8 @@ public class NotesListActivity extends AppCompatActivity implements View.OnClick
         noteRepository.getTasks().observe(this, new Observer<List<Note>>() {
             @Override
             public void onChanged(@Nullable List<Note> notes) {
-                if(notes.size() > 0) {
+                if (notes.size() > 0) {
+                    Log.i(tag, "updateTaskList called ... ");
                     emptyView.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
                     if (notesListAdapter == null) {
@@ -91,7 +94,7 @@ public class NotesListActivity extends AppCompatActivity implements View.OnClick
     @Override
     public void onItemClick(View parentView, View childView, int position) {
         Note note = notesListAdapter.getItem(position);
-        if(note.isEncrypt()) {
+        if (note.isEncrypt()) {
             NavigatorUtils.redirectToPwdScreen(this, note);
 
         } else {
@@ -100,14 +103,13 @@ public class NotesListActivity extends AppCompatActivity implements View.OnClick
     }
 
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
 
-            if(data.hasExtra(INTENT_TASK)) {
-                if(data.hasExtra(INTENT_DELETE)) {
+            if (data.hasExtra(INTENT_TASK)) {
+                if (data.hasExtra(INTENT_DELETE)) {
                     noteRepository.deleteTask((Note) data.getSerializableExtra(INTENT_TASK));
 
                 } else {
